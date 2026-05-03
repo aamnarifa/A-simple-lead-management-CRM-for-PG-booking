@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const client = axios.create({
-  baseURL: "https://pg-crm-backend.onrender.com/api",
+  baseURL: process.env.REACT_APP_API_URL || "https://pg-crm-backend.onrender.com/api",
   headers: { "Content-Type": "application/json" },
 });
 
@@ -16,6 +16,6 @@ export const createLead = async (lead) => {
 };
 
 export const updateLead = async (id, updates) => {
-  const response = await client.put(`/leads/${id}`, updates);
+  const response = await client.patch(`/leads/${id}`, updates);
   return response.data;
 };

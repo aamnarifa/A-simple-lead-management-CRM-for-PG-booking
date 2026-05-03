@@ -24,7 +24,7 @@ export default function LeadForm({ onSubmit, onClose, initialName = "", initialP
           type="text"
           value={name}
           onChange={(event) => setName(event.target.value)}
-          className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          className="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           placeholder="Enter lead name"
         />
       </div>
@@ -35,7 +35,7 @@ export default function LeadForm({ onSubmit, onClose, initialName = "", initialP
           type="tel"
           value={phone}
           onChange={(event) => setPhone(event.target.value)}
-          className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          className="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           placeholder="Enter phone number"
         />
       </div>
@@ -44,13 +44,13 @@ export default function LeadForm({ onSubmit, onClose, initialName = "", initialP
         <button
           type="button"
           onClick={onClose}
-          className="rounded-2xl border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+          className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 hover:shadow-lg"
         >
           Save Lead
         </button>

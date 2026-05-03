@@ -9,17 +9,33 @@ export const formatDate = (dateString) => {
 };
 
 export const statusLabelStyles = {
-  New: "bg-sky-100 text-sky-700",
-  Contacted: "bg-amber-100 text-amber-700",
-  "Visit Scheduled": "bg-violet-100 text-violet-700",
-  Converted: "bg-emerald-100 text-emerald-700",
-  Lost: "bg-rose-100 text-rose-700",
+  New: "bg-blue-100 text-blue-700 border-blue-200",
+  Contacted: "bg-orange-100 text-orange-700 border-orange-200",
+  "Visit Scheduled": "bg-purple-100 text-purple-700 border-purple-200",
+  Converted: "bg-green-100 text-green-700 border-green-200",
+  Lost: "bg-red-100 text-red-700 border-red-200",
 };
 
 export const statusBorderStyles = {
-  New: "border-sky-200",
-  Contacted: "border-amber-200",
-  "Visit Scheduled": "border-violet-200",
-  Converted: "border-emerald-200",
-  Lost: "border-rose-200",
+  New: "border-blue-200",
+  Contacted: "border-orange-200",
+  "Visit Scheduled": "border-purple-200",
+  Converted: "border-green-200",
+  Lost: "border-red-200",
+};
+
+export const statusDotStyles = {
+  New: "bg-blue-500",
+  Contacted: "bg-orange-500",
+  "Visit Scheduled": "bg-purple-500",
+  Converted: "bg-green-500",
+  Lost: "bg-red-500",
+};
+
+export const statusColors = {
+  New: "blue",
+  Contacted: "orange",
+  "Visit Scheduled": "purple",
+  Converted: "green",
+  Lost: "red",
 };

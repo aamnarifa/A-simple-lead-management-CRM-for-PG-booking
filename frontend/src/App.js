@@ -7,7 +7,6 @@ import Toast from "./components/Toast";
 import { createLead, getLeads, updateLead } from "./services/api";
 
 const STATUS_OPTIONS = ["New", "Contacted", "Visit Scheduled", "Converted", "Lost"];
-const DEFAULT_ASSIGNEE = "Unassigned";
 
 function App() {
   const [page, setPage] = useState("Dashboard");
@@ -17,30 +16,12 @@ function App() {
   const [errorMessage, setErrorMessage] = useState("");
   const [validationMessage, setValidationMessage] = useState("");
   const [toastMessage, setToastMessage] = useState("");
+  const [pendingVisitLeadId, setPendingVisitLeadId] = useState("");
 
-  const normalizeLead = useCallback((lead) => {
-    const normalized = { ...lead };
-    normalized.assignedTo = normalized.assignedTo || DEFAULT_ASSIGNEE;
-
-    if (normalized.visitDate && normalized.status !== "Visit Scheduled") {
-      normalized.status = "Visit Scheduled";
-    }
-
-    if (normalized.status === "Visit Scheduled" && !normalized.visitDate) {
-      normalized.status = "New";
-      normalized.visitDate = null;
-    }
-
-    if (normalized.status !== "Visit Scheduled" && normalized.visitDate) {
-      normalized.visitDate = null;
-    }
-
-    return normalized;
-  }, []);
-
-  const showToast = (message) => {
+  const showToast = useCallback((message) => {
     setToastMessage(message);
-  };
+    setTimeout(() => setToastMessage(""), 3000);
+  }, []);
 
   const fetchLeads = useCallback(async () => {
     setLoading(true);
@@ -48,14 +29,14 @@ function App() {
 
     try {
       const data = await getLeads();
-      setLeads(data.map(normalizeLead));
+      setLeads(data);
     } catch (error) {
-      console.error(error);
-      setErrorMessage("Unable to load leads from the server.");
+      console.error("Failed to fetch leads:", error);
+      setErrorMessage("Unable to load leads from the server. Please check your connection.");
     } finally {
       setLoading(false);
     }
-  }, [normalizeLead]);
+  }, []);
 
   useEffect(() => {
     fetchLeads();
@@ -75,90 +56,79 @@ function App() {
     return groups;
   }, [leads]);
 
-  const handleCreateLead = async (leadData) => {
-    setErrorMessage("");
-    setValidationMessage("");
-    const tempId = `temp-${Date.now()}`;
-    const temporaryLead = {
-      _id: tempId,
-      ...leadData,
-      status: "New",
-      assignedTo: DEFAULT_ASSIGNEE,
-      visitDate: null,
-    };
-
-    setLeads((prev) => [temporaryLead, ...prev]);
-    setModalOpen(false);
-
-    try {
-      const savedLead = await createLead({ ...leadData, assignedTo: DEFAULT_ASSIGNEE });
-      setLeads((prev) => prev.map((lead) => (lead._id === tempId ? normalizeLead(savedLead) : lead)));
-      showToast("Lead added");
-    } catch (error) {
-      console.error(error);
-      setLeads((prev) => prev.filter((lead) => lead._id !== tempId));
-      setErrorMessage("Unable to add new lead. Please try again.");
-    }
-  };
-
-  const updateLeadField = async (id, updates, toastText) => {
-    const lead = leads.find((item) => item._id === id);
-    if (!lead) return;
-
-    const nextLead = normalizeLead({ ...lead, ...updates });
-    setLeads((prev) => prev.map((item) => (item._id === id ? nextLead : item)));
+  const handleCreateLead = useCallback(async (leadData) => {
     setErrorMessage("");
     setValidationMessage("");
 
     try {
-      await updateLead(id, {
-        status: nextLead.status,
-        visitDate: nextLead.visitDate,
-        assignedTo: nextLead.assignedTo,
-      });
-      if (toastText) showToast(toastText);
+      const savedLead = await createLead(leadData);
+      setLeads((prev) => [savedLead, ...prev]);
+      setModalOpen(false);
+      showToast("Lead added successfully");
     } catch (error) {
-      console.error(error);
-      setErrorMessage("Unable to save changes. Refreshing data.");
-      fetchLeads();
+      console.error("Failed to create lead:", error);
+      setErrorMessage(error.response?.data?.error || "Unable to add new lead. Please try again.");
     }
-  };
+  }, [showToast]);
 
-  const handleStatusChange = (id, status) => {
-    const lead = leads.find((item) => item._id === id);
-    if (!lead) return;
+  const updateLeadInState = useCallback((id, updater) => {
+    setLeads((prev) => prev.map((lead) => (lead._id === id ? updater(lead) : lead)));
+  }, []);
 
-    if (status === "Visit Scheduled" && !lead.visitDate) {
-      setValidationMessage("Please select a visit date before setting this status.");
+  const patchLeadGlobally = useCallback(async (id, updates, successMessage, optimisticUpdates = updates) => {
+    const previousLeads = leads;
+    setErrorMessage("");
+    updateLeadInState(id, (lead) => ({ ...lead, ...optimisticUpdates }));
+
+    try {
+      const updatedLead = await updateLead(id, updates);
+      updateLeadInState(id, () => updatedLead);
+      showToast(successMessage);
+      return updatedLead;
+    } catch (error) {
+      console.error("Failed to update lead:", error);
+      setLeads(previousLeads);
+      setErrorMessage(error.response?.data?.error || "Unable to update lead. Please try again.");
+      throw error;
+    }
+  }, [leads, showToast, updateLeadInState]);
+
+  const handleStatusChange = useCallback(async (id, status) => {
+    if (status === "Visit Scheduled") {
+      setPendingVisitLeadId(id);
+      showToast("Pick a visit date to schedule");
       return;
     }
 
-    const updates = { status };
-    if (status !== "Visit Scheduled" && lead.visitDate) {
-      updates.visitDate = null;
+    try {
+      await patchLeadGlobally(id, { status }, "Status updated", { status, visitDate: null });
+      setPendingVisitLeadId((current) => (current === id ? "" : current));
+    } catch {
+      return null;
+    }
+  }, [patchLeadGlobally, showToast]);
+
+  const handleVisitDateChange = useCallback(async (id, visitDate) => {
+    if (!visitDate) {
+      setPendingVisitLeadId((current) => (current === id ? "" : current));
+      return;
     }
 
-    setValidationMessage("");
-    updateLeadField(id, updates, "Status updated");
-  };
-
-  const handleVisitDateChange = (id, visitDate) => {
-    const lead = leads.find((item) => item._id === id);
-    if (!lead) return;
-
-    const updates = { visitDate: visitDate || null };
-    if (visitDate) {
-      updates.status = "Visit Scheduled";
-    } else if (lead.status === "Visit Scheduled") {
-      updates.status = "New";
+    try {
+      await patchLeadGlobally(id, { visitDate }, "Visit scheduled", { visitDate, status: "Visit Scheduled" });
+      setPendingVisitLeadId("");
+    } catch {
+      return null;
     }
+  }, [patchLeadGlobally]);
 
-    updateLeadField(id, updates, visitDate ? "Visit scheduled" : "Visit date cleared");
-  };
-
-  const handleAssignChange = (id, assignedTo) => {
-    updateLeadField(id, { assignedTo }, "Owner updated");
-  };
+  const handleAssignChange = useCallback(async (id, assignedTo) => {
+    try {
+      await patchLeadGlobally(id, { assignedTo }, "Owner updated", { assignedTo });
+    } catch {
+      return null;
+    }
+  }, [patchLeadGlobally]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -166,13 +136,19 @@ function App() {
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {errorMessage && (
-          <div className="mb-6 rounded-3xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 shadow-sm">
-            {errorMessage}
+          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 shadow-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-red-500">!</span>
+              {errorMessage}
+            </div>
           </div>
         )}
         {validationMessage && (
-          <div className="mb-6 rounded-3xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700 shadow-sm">
-            {validationMessage}
+          <div className="mb-6 rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-700 shadow-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-orange-500">i</span>
+              {validationMessage}
+            </div>
           </div>
         )}
 
@@ -188,6 +164,8 @@ function App() {
             statuses={STATUS_OPTIONS}
             onUpdateStatus={handleStatusChange}
             onUpdateAssignedTo={handleAssignChange}
+            onUpdateVisitDate={handleVisitDateChange}
+            pendingVisitLeadId={pendingVisitLeadId}
           />
         )}
         {page === "Pipeline" && (
@@ -197,6 +175,7 @@ function App() {
             onUpdateStatus={handleStatusChange}
             onUpdateVisitDate={handleVisitDateChange}
             onUpdateAssignedTo={handleAssignChange}
+            pendingVisitLeadId={pendingVisitLeadId}
           />
         )}
       </main>

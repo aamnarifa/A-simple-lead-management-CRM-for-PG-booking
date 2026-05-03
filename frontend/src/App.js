@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
@@ -18,7 +18,7 @@ function App() {
   const [validationMessage, setValidationMessage] = useState("");
   const [toastMessage, setToastMessage] = useState("");
 
-  const normalizeLead = (lead) => {
+  const normalizeLead = useCallback((lead) => {
     const normalized = { ...lead };
     normalized.assignedTo = normalized.assignedTo || DEFAULT_ASSIGNEE;
 
@@ -36,13 +36,13 @@ function App() {
     }
 
     return normalized;
-  };
+  }, []);
 
   const showToast = (message) => {
     setToastMessage(message);
   };
 
-  const fetchLeads = async () => {
+  const fetchLeads = useCallback(async () => {
     setLoading(true);
     setErrorMessage("");
 
@@ -55,11 +55,11 @@ function App() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [normalizeLead]);
 
   useEffect(() => {
     fetchLeads();
-  }, []);
+  }, [fetchLeads]);
 
   const groupedLeads = useMemo(() => {
     const groups = STATUS_OPTIONS.reduce((acc, status) => {
@@ -188,20 +188,6 @@ function App() {
             statuses={STATUS_OPTIONS}
             onUpdateStatus={handleStatusChange}
             onUpdateAssignedTo={handleAssignChange}
-          />
-        )}
-        {page === "Pipeline" && (
-          <Pipeline
-            groupedLeads={groupedLeads}
-            statuses={STATUS_OPTIONS}
-            onUpdateStatus={handleStatusChange}
-            onUpdateVisitDate={handleVisitDateChange}
-            onUpdateAssignedTo={handleAssignChange}
-          />
-        )}
-      </main>
-
-      <Toast message={toastMessage} onClose={() => setToastMessage("")} /onUpdateAssignedTo={handleAssignChange}
           />
         )}
         {page === "Pipeline" && (

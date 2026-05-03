@@ -38,19 +38,6 @@ export default function DashboardCards({ stats }) {
             </div>
           </div>
         );
-      } return (
-          <div key={card.title} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">{card.title}</p>
-                <p className="mt-3 text-3xl font-semibold text-slate-900">{card.value}</p>
-              </div>
-              <div className={`flex h-12 w-12 items-center justify-center rounded-3xl ${meta.accent}`}>
-                <span className="text-xl">{meta.icon}</span>
-              </div>
-            </div>
-          </div>
-        );
       })}
     </div>
   );

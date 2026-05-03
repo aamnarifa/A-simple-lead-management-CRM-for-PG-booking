@@ -78,12 +78,6 @@ export default function Leads({ leads, loading, modalOpen, onOpenModal, onCloseM
               ) : (
                 <tr>
                   <td colSpan="5" className="px-4 py-16 text-center text-slate-500">
-                    {loading ? "Loading leads..." : "No leads yet — start by adding a new lead === "Visit Scheduled" && lead.visitDate ? formatDate(lead.visitDate) : "—"}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="px-4 py-16 text-center text-slate-500">
                     {loading ? "Loading leads..." : "No leads yet — start by adding a new lead."}
                   </td>
                 </tr>

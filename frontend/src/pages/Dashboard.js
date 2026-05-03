@@ -66,10 +66,6 @@ export default function Dashboard({ leads, loading }) {
                       </span>
                     </td>
                     <td className="px-4 py-4 text-slate-600">{lead.assignedTo || "Unassigned"}</td>
-                    <td className="px-4 py-4 text-slate-600">{lead.status === "Visit Scheduled" && lead.visitDate ? formatDate(lead.visitDate
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 text-slate-600">{lead.assignedTo || "Unassigned"}</td>
                     <td className="px-4 py-4 text-slate-600">{lead.status === "Visit Scheduled" && lead.visitDate ? formatDate(lead.visitDate) : "—"}</td>
                   </tr>
                 ))

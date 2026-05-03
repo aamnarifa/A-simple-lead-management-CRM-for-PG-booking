@@ -19,3 +19,9 @@ body {
 #root {
   min-height: 100vh;
 }
+
+select,
+input,
+button {
+  font: inherit;
+}

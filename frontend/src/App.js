@@ -64,7 +64,7 @@ function App() {
       const savedLead = await createLead(leadData);
       setLeads((prev) => [savedLead, ...prev]);
       setModalOpen(false);
-      showToast("Lead added successfully");
+      showToast("Lead added");
     } catch (error) {
       console.error("Failed to create lead:", error);
       setErrorMessage(error.response?.data?.error || "Unable to add new lead. Please try again.");
@@ -101,7 +101,7 @@ function App() {
     }
 
     try {
-      await patchLeadGlobally(id, { status }, "Status updated", { status, visitDate: null });
+      await patchLeadGlobally(id, { status }, "Lead updated", { status, visitDate: null });
       setPendingVisitLeadId((current) => (current === id ? "" : current));
     } catch {
       return null;
@@ -124,7 +124,7 @@ function App() {
 
   const handleAssignChange = useCallback(async (id, assignedTo) => {
     try {
-      await patchLeadGlobally(id, { assignedTo }, "Owner updated", { assignedTo });
+      await patchLeadGlobally(id, { assignedTo }, "Lead updated", { assignedTo });
     } catch {
       return null;
     }
@@ -134,9 +134,9 @@ function App() {
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <Navbar currentPage={page} onChangePage={setPage} />
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
         {errorMessage && (
-          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 shadow-sm">
+          <div className="mb-4 rounded-[10px] border border-red-200 bg-red-50 p-3 text-sm text-red-700 shadow-sm">
             <div className="flex items-center gap-2">
               <span className="text-red-500">!</span>
               {errorMessage}
@@ -144,7 +144,7 @@ function App() {
           </div>
         )}
         {validationMessage && (
-          <div className="mb-6 rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-700 shadow-sm">
+          <div className="mb-4 rounded-[10px] border border-orange-200 bg-orange-50 p-3 text-sm text-orange-700 shadow-sm">
             <div className="flex items-center gap-2">
               <span className="text-orange-500">i</span>
               {validationMessage}

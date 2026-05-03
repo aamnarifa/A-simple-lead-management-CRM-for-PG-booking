@@ -22,17 +22,17 @@ export default function DashboardCards({ stats }) {
   ];
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((card) => {
         const meta = cardMeta[card.title];
         return (
-          <div key={card.title} className={`rounded-3xl border border-slate-200 ${meta.bg} p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl`}>
-            <div className="flex items-start justify-between gap-4">
+          <div key={card.title} className={`rounded-[10px] border border-slate-200 ${meta.bg} p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md`}>
+            <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">{card.title}</p>
-                <p className="mt-3 text-4xl font-bold text-slate-900">{card.value}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">{card.title}</p>
+                <p className="mt-2 text-4xl font-bold text-slate-950">{card.value}</p>
               </div>
-              <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${meta.accent}`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-[10px] ${meta.accent}`}>
                 <span className="text-sm font-bold">{meta.icon}</span>
               </div>
             </div>

@@ -18,15 +18,15 @@ export default function Dashboard({ leads, loading }) {
   const recentLeads = [...leads].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+    <div className="space-y-4">
+      <div className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Welcome back</p>
-            <h2 className="mt-3 text-3xl font-bold text-slate-900">Pipeline Overview</h2>
-            <p className="mt-2 text-sm text-slate-500">Monitor lead progress, schedule visits, and keep your sales pipeline moving.</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Workspace</p>
+            <h2 className="mt-1 text-2xl font-bold text-slate-950">Pipeline Overview</h2>
+            <p className="mt-1 text-sm text-slate-500">Monitor lead progress, visits, and conversion health.</p>
           </div>
-          <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
+          <div className="rounded-[10px] border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
             {loading ? "Refreshing leads..." : `${leads.length} leads loaded`}
           </div>
         </div>
@@ -34,19 +34,19 @@ export default function Dashboard({ leads, loading }) {
 
       <DashboardCards stats={stats} />
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+      <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-xl font-bold text-slate-900">Recent Leads</h3>
+            <h3 className="text-lg font-bold text-slate-950">Recent Leads</h3>
             <p className="text-sm text-slate-500">Latest entries from your CRM</p>
           </div>
-          <p className="text-sm text-slate-500">Conversion rate: {stats.conversionRate}%</p>
+          <p className="rounded-[10px] border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700">Conversion rate: {stats.conversionRate}%</p>
         </div>
 
-        <div className="mt-6 space-y-4">
+        <div className="mt-4 divide-y divide-slate-100 overflow-hidden rounded-[10px] border border-slate-100">
           {recentLeads.length ? (
             recentLeads.map((lead) => (
-              <div key={lead._id} className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 p-4 transition hover:bg-slate-100 hover:shadow-sm">
+              <div key={lead._id} className="flex items-center justify-between bg-white p-3 transition hover:bg-blue-50/50">
                 <div>
                   <p className="font-semibold text-slate-900">{lead.name}</p>
                   <p className="text-sm text-slate-500">{lead.phone}</p>
@@ -56,13 +56,13 @@ export default function Dashboard({ leads, loading }) {
                     {lead.status}
                   </div>
                   {lead.visitDate && (
-                    <p className="mt-1 text-xs text-slate-500">{formatDate(lead.visitDate)}</p>
+                    <p className="mt-1 text-xs font-semibold text-purple-700">{formatDate(lead.visitDate)}</p>
                   )}
                 </div>
               </div>
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex flex-col items-center justify-center py-10 text-center">
               <div className="text-slate-300">
                 <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

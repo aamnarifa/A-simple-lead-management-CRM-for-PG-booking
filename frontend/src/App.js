@@ -4,7 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
 import Pipeline from "./pages/Pipeline";
 import Toast from "./components/Toast";
-import { createLead, getLeads, updateLead } from "./services/api";
+import { createLead, deleteLead, getLeads, updateLead } from "./services/api";
 
 const STATUS_OPTIONS = ["New", "Contacted", "Visit Scheduled", "Converted", "Lost"];
 
@@ -145,6 +145,28 @@ function App() {
     }
   }, [patchLeadGlobally]);
 
+  const handleDeleteLead = useCallback(async (id) => {
+    const lead = leads.find((item) => item._id === id);
+    const leadName = lead?.name || "this lead";
+
+    if (!window.confirm(`Delete ${leadName}? This cannot be undone.`)) {
+      return;
+    }
+
+    setErrorMessage("");
+    setValidationMessage("");
+
+    try {
+      await deleteLead(id);
+      setLeads((prev) => prev.filter((item) => item._id !== id));
+      setPendingVisitLeadId((current) => (current === id ? "" : current));
+      showToast("Lead deleted");
+    } catch (error) {
+      console.error("Failed to delete lead:", error);
+      setErrorMessage(error.response?.data?.error || "Unable to delete lead. Please try again.");
+    }
+  }, [leads, showToast]);
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <Navbar currentPage={page} onChangePage={setPage} />
@@ -180,6 +202,7 @@ function App() {
             onUpdateStatus={handleStatusChange}
             onUpdateAssignedTo={handleAssignChange}
             onUpdateVisitDate={handleVisitDateChange}
+            onDeleteLead={handleDeleteLead}
             pendingVisitLeadId={pendingVisitLeadId}
           />
         )}
@@ -190,6 +213,7 @@ function App() {
             onUpdateStatus={handleStatusChange}
             onUpdateVisitDate={handleVisitDateChange}
             onUpdateAssignedTo={handleAssignChange}
+            onDeleteLead={handleDeleteLead}
             pendingVisitLeadId={pendingVisitLeadId}
           />
         )}

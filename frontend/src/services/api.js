@@ -19,3 +19,8 @@ export const updateLead = async (id, updates) => {
   const response = await client.patch(`/leads/${id}`, updates);
   return response.data;
 };
+
+export const deleteLead = async (id) => {
+  const response = await client.delete(`/leads/${id}`);
+  return response.data;
+};

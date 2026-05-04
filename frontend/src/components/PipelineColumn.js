@@ -2,7 +2,7 @@ import React from "react";
 import LeadCard from "./LeadCard";
 import { statusDotStyles } from "../utils/format";
 
-export default function PipelineColumn({ title, leads, statuses, onUpdateStatus, onUpdateVisitDate, onUpdateAssignedTo, pendingVisitLeadId }) {
+export default function PipelineColumn({ title, leads, statuses, onUpdateStatus, onUpdateVisitDate, onUpdateAssignedTo, onDeleteLead, pendingVisitLeadId }) {
   return (
     <section className="min-w-[310px] rounded-lg border border-slate-200 bg-slate-50/80 p-4 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
@@ -23,6 +23,7 @@ export default function PipelineColumn({ title, leads, statuses, onUpdateStatus,
               onUpdateStatus={onUpdateStatus}
               onUpdateVisitDate={onUpdateVisitDate}
               onUpdateAssignedTo={onUpdateAssignedTo}
+              onDeleteLead={onDeleteLead}
               pendingVisitLeadId={pendingVisitLeadId}
             />
           ))

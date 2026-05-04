@@ -15,10 +15,10 @@ const leadSchema = new mongoose.Schema(
             trim: true,
             validate: {
                 validator: function(v) {
-                    // Basic phone validation - allows international format
-                    return /^[\+]?[1-9][\d]{0,15}$/.test(v.replace(/[\s\-\(\)]/g, ''));
+                    // Indian mobile number: exactly 10 digits, starts with 6-9
+                    return /^[6-9]\d{9}$/.test(String(v).replace(/[\s\-\(\)]/g, ''));
                 },
-                message: "Invalid phone number format"
+                message: "Phone number must be a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9"
             }
         },
         source: {

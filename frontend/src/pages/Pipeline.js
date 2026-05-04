@@ -1,7 +1,7 @@
 import React from "react";
 import PipelineColumn from "../components/PipelineColumn";
 
-export default function Pipeline({ groupedLeads, statuses, onUpdateStatus, onUpdateVisitDate, onUpdateAssignedTo, pendingVisitLeadId }) {
+export default function Pipeline({ groupedLeads, statuses, onUpdateStatus, onUpdateVisitDate, onUpdateAssignedTo, onDeleteLead, pendingVisitLeadId }) {
   return (
     <div className="space-y-4">
       <div className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-sm">
@@ -24,6 +24,7 @@ export default function Pipeline({ groupedLeads, statuses, onUpdateStatus, onUpd
               onUpdateStatus={onUpdateStatus}
               onUpdateVisitDate={onUpdateVisitDate}
               onUpdateAssignedTo={onUpdateAssignedTo}
+              onDeleteLead={onDeleteLead}
               pendingVisitLeadId={pendingVisitLeadId}
             />
           ))}

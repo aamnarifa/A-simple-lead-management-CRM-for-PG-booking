@@ -4,7 +4,7 @@ import { formatDate, formatDateInput, statusLabelStyles } from "../utils/format"
 
 const ASSIGNEES = ["Unassigned", "Agent A", "Agent B"];
 
-export default function Leads({ leads, loading, modalOpen, onOpenModal, onCloseModal, onCreateLead, statuses, onUpdateStatus, onUpdateAssignedTo, onUpdateVisitDate, pendingVisitLeadId }) {
+export default function Leads({ leads, loading, modalOpen, onOpenModal, onCloseModal, onCreateLead, statuses, onUpdateStatus, onUpdateAssignedTo, onUpdateVisitDate, onDeleteLead, pendingVisitLeadId }) {
   return (
     <div className="space-y-4">
       <div className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-sm">
@@ -36,6 +36,7 @@ export default function Leads({ leads, loading, modalOpen, onOpenModal, onCloseM
                 <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600">Status</th>
                 <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600">Owner</th>
                 <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600">Visit Date</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
@@ -95,11 +96,20 @@ export default function Leads({ leads, loading, modalOpen, onOpenModal, onCloseM
                         <span className="text-slate-400">-</span>
                       )}
                     </td>
+                    <td className="px-5 py-4 align-middle">
+                      <button
+                        type="button"
+                        onClick={() => onDeleteLead(lead._id)}
+                        className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+                      >
+                        Delete
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-4 py-12 text-center">
+                  <td colSpan="6" className="px-4 py-12 text-center">
                     {loading ? (
                       <div className="flex flex-col items-center gap-4">
                         <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>

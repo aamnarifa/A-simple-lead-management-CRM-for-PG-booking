@@ -4,11 +4,13 @@ const VISIT_SCHEDULED = "Visit Scheduled";
 const VALID_STATUSES = ["New", "Contacted", VISIT_SCHEDULED, "Converted", "Lost"];
 const FINAL_STATUSES = ["Converted", "Lost"];
 const ALLOWED_UPDATES = ["name", "phone", "source", "status", "assignedTo", "visitDate"];
+const PHONE_RULE_MESSAGE = "Phone number must be a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9";
 
 // Validation helpers
+const normalizePhone = (phone) => String(phone).replace(/[\s\-\(\)]/g, '');
+
 const validatePhone = (phone) => {
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    return phoneRegex.test(String(phone).replace(/[\s\-\(\)]/g, ''));
+    return /^[6-9]\d{9}$/.test(normalizePhone(phone));
 };
 
 const validateRequired = (data, fields) => {
@@ -45,7 +47,7 @@ const validateLeadIdentity = (updates) => {
     }
 
     if (hasOwn(updates, "phone") && phone && !validatePhone(phone)) {
-        throw new Error("Invalid phone number format");
+        throw new Error(PHONE_RULE_MESSAGE);
     }
 };
 
@@ -104,7 +106,7 @@ const updateLead = async (id, incomingUpdates = {}) => {
     }
 
     if (hasOwn(updates, "phone")) {
-        lead.phone = sanitizeText(updates.phone);
+        lead.phone = normalizePhone(updates.phone);
     }
 
     if (hasOwn(updates, "source")) {
@@ -154,7 +156,7 @@ const updateLead = async (id, incomingUpdates = {}) => {
         throw new Error("Phone number is required");
     }
 
-    const savedLead = await lead.save();
+    const savedLead = await lead.save({ validateModifiedOnly: true });
     return Lead.findById(savedLead._id);
 };
 
@@ -177,7 +179,7 @@ exports.createLead = async (req, res) => {
 
         const leadData = {
             name: sanitizeText(name),
-            phone: sanitizeText(phone),
+            phone: normalizePhone(phone),
             ...otherData,
             status: "New",
             assignedTo: otherData.assignedTo || "Unassigned"
@@ -201,6 +203,22 @@ exports.updateLead = async (req, res) => {
         }
 
         res.status(200).json(lead);
+    } catch (error) {
+        console.error("ERROR:", error.message);
+        res.status(400).json({ error: error.message });
+    }
+};
+
+exports.deleteLead = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const lead = await Lead.findByIdAndDelete(id);
+
+        if (!lead) {
+            return res.status(404).json({ error: "Lead not found" });
+        }
+
+        res.status(200).json({ message: "Lead deleted", lead });
     } catch (error) {
         console.error("ERROR:", error.message);
         res.status(400).json({ error: error.message });

@@ -3,7 +3,7 @@ import { formatDate, formatDateInput, statusLabelStyles, statusBorderStyles } fr
 
 const ASSIGNEES = ["Unassigned", "Agent A", "Agent B"];
 
-export default function LeadCard({ lead, statuses, onUpdateStatus, onUpdateVisitDate, onUpdateAssignedTo, pendingVisitLeadId }) {
+export default function LeadCard({ lead, statuses, onUpdateStatus, onUpdateVisitDate, onUpdateAssignedTo, onDeleteLead, pendingVisitLeadId }) {
   const formattedDate = formatDateInput(lead.visitDate);
   const isVisitDateOpen = lead.status === "Visit Scheduled" || pendingVisitLeadId === lead._id;
   const statusClasses = statusLabelStyles[lead.status] || "bg-slate-100 text-slate-700 border-slate-200";
@@ -85,6 +85,14 @@ export default function LeadCard({ lead, statuses, onUpdateStatus, onUpdateVisit
           </div>
           )}
         </div>
+
+        <button
+          type="button"
+          onClick={() => onDeleteLead(lead._id)}
+          className="w-full rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+        >
+          Delete Lead
+        </button>
       </div>
     </article>
   );

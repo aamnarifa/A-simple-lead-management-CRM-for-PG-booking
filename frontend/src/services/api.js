@@ -1,7 +1,11 @@
 import axios from "axios";
 
+const defaultApiUrl = process.env.NODE_ENV === "development"
+  ? "http://localhost:5000/api"
+  : "/api";
+
 const client = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "https://pg-crm-backend.onrender.com/api",
+  baseURL: process.env.REACT_APP_API_URL || defaultApiUrl,
   headers: { "Content-Type": "application/json" },
 });
 

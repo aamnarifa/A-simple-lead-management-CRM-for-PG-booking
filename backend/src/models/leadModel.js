@@ -61,7 +61,7 @@ const leadSchema = new mongoose.Schema(
 );
 
 // Pre-save middleware to enforce business rules
-leadSchema.pre('save', function(next) {
+leadSchema.pre('save', function() {
     // If visitDate is set, status must be "Visit Scheduled"
     if (this.visitDate && this.status !== "Visit Scheduled") {
         this.status = "Visit Scheduled";
@@ -69,15 +69,13 @@ leadSchema.pre('save', function(next) {
 
     // If status is "Visit Scheduled", visitDate must exist
     if (this.status === "Visit Scheduled" && !this.visitDate) {
-        return next(new Error("Visit date is required when status is 'Visit Scheduled'"));
+        throw new Error("Visit date is required when status is 'Visit Scheduled'");
     }
 
     // If status changes from "Visit Scheduled", remove visitDate
     if (this.isModified('status') && this.status !== "Visit Scheduled") {
         this.visitDate = null;
     }
-
-    next();
 });
 
 // Virtual for formatted visit date

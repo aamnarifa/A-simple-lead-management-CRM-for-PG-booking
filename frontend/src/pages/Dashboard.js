@@ -52,7 +52,7 @@ export default function Dashboard({ leads, loading }) {
                   <p className="text-sm text-slate-500">{lead.phone}</p>
                 </div>
                 <div className="text-right">
-                  <div className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusLabelStyles[lead.status]}`}>
+                  <div className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${statusLabelStyles[lead.status]}`}>
                     {lead.status}
                   </div>
                   {lead.visitDate && (

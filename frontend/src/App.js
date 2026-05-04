@@ -23,6 +23,11 @@ function App() {
     setTimeout(() => setToastMessage(""), 3000);
   }, []);
 
+  const showValidation = useCallback((message) => {
+    setValidationMessage(message);
+    window.alert(message);
+  }, []);
+
   const fetchLeads = useCallback(async () => {
     setLoading(true);
     setErrorMessage("");
@@ -71,60 +76,70 @@ function App() {
     }
   }, [showToast]);
 
-  const updateLeadInState = useCallback((id, updater) => {
-    setLeads((prev) => prev.map((lead) => (lead._id === id ? updater(lead) : lead)));
+  const replaceLeadInState = useCallback((updatedLead) => {
+    setLeads((prev) => prev.map((lead) => (lead._id === updatedLead._id ? updatedLead : lead)));
   }, []);
 
-  const patchLeadGlobally = useCallback(async (id, updates, successMessage, optimisticUpdates = updates) => {
-    const previousLeads = leads;
+  const patchLeadGlobally = useCallback(async (id, updates, successMessage) => {
     setErrorMessage("");
-    updateLeadInState(id, (lead) => ({ ...lead, ...optimisticUpdates }));
+    setValidationMessage("");
 
     try {
       const updatedLead = await updateLead(id, updates);
-      updateLeadInState(id, () => updatedLead);
+      replaceLeadInState(updatedLead);
       showToast(successMessage);
       return updatedLead;
     } catch (error) {
       console.error("Failed to update lead:", error);
-      setLeads(previousLeads);
       setErrorMessage(error.response?.data?.error || "Unable to update lead. Please try again.");
       throw error;
     }
-  }, [leads, showToast, updateLeadInState]);
+  }, [replaceLeadInState, showToast]);
 
   const handleStatusChange = useCallback(async (id, status) => {
+    const currentLead = leads.find((lead) => lead._id === id);
+
     if (status === "Visit Scheduled") {
+      if (currentLead?.visitDate) {
+        try {
+          await patchLeadGlobally(id, { status }, "Lead updated");
+        } catch {
+          return null;
+        }
+        return;
+      }
+
       setPendingVisitLeadId(id);
-      showToast("Pick a visit date to schedule");
+      showValidation("Please select a visit date before scheduling a visit.");
       return;
     }
 
     try {
-      await patchLeadGlobally(id, { status }, "Lead updated", { status, visitDate: null });
+      await patchLeadGlobally(id, { status }, "Lead updated");
       setPendingVisitLeadId((current) => (current === id ? "" : current));
     } catch {
       return null;
     }
-  }, [patchLeadGlobally, showToast]);
+  }, [leads, patchLeadGlobally, showValidation]);
 
   const handleVisitDateChange = useCallback(async (id, visitDate) => {
     if (!visitDate) {
-      setPendingVisitLeadId((current) => (current === id ? "" : current));
+      setPendingVisitLeadId(id);
+      showValidation("Please select a visit date before scheduling a visit.");
       return;
     }
 
     try {
-      await patchLeadGlobally(id, { visitDate }, "Visit scheduled", { visitDate, status: "Visit Scheduled" });
+      await patchLeadGlobally(id, { visitDate }, "Visit scheduled");
       setPendingVisitLeadId("");
     } catch {
       return null;
     }
-  }, [patchLeadGlobally]);
+  }, [patchLeadGlobally, showValidation]);
 
   const handleAssignChange = useCallback(async (id, assignedTo) => {
     try {
-      await patchLeadGlobally(id, { assignedTo }, "Lead updated", { assignedTo });
+      await patchLeadGlobally(id, { assignedTo }, "Lead updated");
     } catch {
       return null;
     }

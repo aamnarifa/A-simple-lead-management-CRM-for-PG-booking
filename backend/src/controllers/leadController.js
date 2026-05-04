@@ -1,6 +1,8 @@
 const Lead = require("../models/leadModel");
 
 const VISIT_SCHEDULED = "Visit Scheduled";
+const VALID_STATUSES = ["New", "Contacted", VISIT_SCHEDULED, "Converted", "Lost"];
+const FINAL_STATUSES = ["Converted", "Lost"];
 const ALLOWED_UPDATES = ["name", "phone", "source", "status", "assignedTo", "visitDate"];
 
 // Validation helpers
@@ -29,14 +31,16 @@ const normalizeVisitDate = (visitDate) => {
     return parsedDate;
 };
 
+const isBlank = (value) => value === undefined || value === null || value.toString().trim() === "";
+
 const validateLeadIdentity = (updates) => {
     const { name, phone } = updates;
 
-    if (hasOwn(updates, "name") && (!name || !name.toString().trim())) {
+    if (hasOwn(updates, "name") && isBlank(name)) {
         throw new Error("Name is required");
     }
 
-    if (hasOwn(updates, "phone") && (!phone || !phone.toString().trim())) {
+    if (hasOwn(updates, "phone") && isBlank(phone)) {
         throw new Error("Phone number is required");
     }
 
@@ -47,6 +51,32 @@ const validateLeadIdentity = (updates) => {
 
 const sanitizeText = (value) => value.toString().trim();
 
+const validateAllowedUpdates = (updates = {}) => {
+    if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
+        throw new Error("Updates must be an object");
+    }
+
+    const invalidFields = Object.keys(updates).filter((field) => !ALLOWED_UPDATES.includes(field));
+
+    if (invalidFields.length > 0) {
+        throw new Error(`Invalid update fields: ${invalidFields.join(", ")}`);
+    }
+};
+
+const validateStatus = (status) => {
+    if (status && !VALID_STATUSES.includes(status)) {
+        throw new Error(`Status must be one of: ${VALID_STATUSES.join(", ")}`);
+    }
+};
+
+const validateStatusTransition = (currentStatus, nextStatus) => {
+    if (!nextStatus || currentStatus === nextStatus) return;
+
+    if (FINAL_STATUSES.includes(currentStatus)) {
+        throw new Error(`Cannot change status after lead is ${currentStatus}`);
+    }
+};
+
 const pickAllowedUpdates = (updates) => {
     return ALLOWED_UPDATES.reduce((picked, field) => {
         if (hasOwn(updates, field)) {
@@ -56,15 +86,18 @@ const pickAllowedUpdates = (updates) => {
     }, {});
 };
 
-const updateLead = async ({ id, status, assignedTo, visitDate, ...rest }) => {
+const updateLead = async (id, incomingUpdates = {}) => {
     const lead = await Lead.findById(id);
 
     if (!lead) {
         return null;
     }
 
-    const updates = pickAllowedUpdates({ status, assignedTo, visitDate, ...rest });
+    validateAllowedUpdates(incomingUpdates);
+
+    const updates = pickAllowedUpdates(incomingUpdates);
     validateLeadIdentity(updates);
+    validateStatus(updates.status);
 
     if (hasOwn(updates, "name")) {
         lead.name = sanitizeText(updates.name);
@@ -85,13 +118,17 @@ const updateLead = async ({ id, status, assignedTo, visitDate, ...rest }) => {
     const statusWasVisitScheduled = lead.status === VISIT_SCHEDULED;
     const statusRequested = hasOwn(updates, "status");
     const visitDateRequested = hasOwn(updates, "visitDate");
+    const normalizedVisitDate = visitDateRequested ? normalizeVisitDate(updates.visitDate) : lead.visitDate;
+    const nextStatus = visitDateRequested && normalizedVisitDate ? VISIT_SCHEDULED : (statusRequested ? updates.status : lead.status);
+
+    validateStatusTransition(lead.status, nextStatus);
 
     if (statusRequested) {
-        lead.status = updates.status;
+        lead.status = nextStatus;
     }
 
     if (visitDateRequested) {
-        lead.visitDate = normalizeVisitDate(updates.visitDate);
+        lead.visitDate = normalizedVisitDate;
         if (lead.visitDate) {
             lead.status = VISIT_SCHEDULED;
         }
@@ -101,15 +138,24 @@ const updateLead = async ({ id, status, assignedTo, visitDate, ...rest }) => {
         lead.visitDate = null;
     }
 
-    if (lead.visitDate && lead.status !== VISIT_SCHEDULED) {
-        throw new Error("Visit date can only be set when status is 'Visit Scheduled'");
+    if (lead.visitDate) {
+        lead.status = VISIT_SCHEDULED;
     }
 
     if (lead.status === VISIT_SCHEDULED && !lead.visitDate) {
         throw new Error("Visit date is required when status is 'Visit Scheduled'");
     }
 
-    return lead.save();
+    if (isBlank(lead.name)) {
+        throw new Error("Name is required");
+    }
+
+    if (isBlank(lead.phone)) {
+        throw new Error("Phone number is required");
+    }
+
+    const savedLead = await lead.save();
+    return Lead.findById(savedLead._id);
 };
 
 exports.getLeads = async (req, res) => {
@@ -148,7 +194,7 @@ exports.createLead = async (req, res) => {
 exports.updateLead = async (req, res) => {
     try {
         const { id } = req.params;
-        const lead = await updateLead({ id, ...req.body });
+        const lead = await updateLead(id, req.body);
 
         if (!lead) {
             return res.status(404).json({ error: "Lead not found" });

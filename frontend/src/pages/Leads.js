@@ -1,6 +1,6 @@
 import React from "react";
 import LeadForm from "../components/LeadForm";
-import { formatDate, statusLabelStyles } from "../utils/format";
+import { formatDate, formatDateInput, statusLabelStyles } from "../utils/format";
 
 const ASSIGNEES = ["Unassigned", "Agent A", "Agent B"];
 
@@ -31,30 +31,30 @@ export default function Leads({ leads, loading, modalOpen, onOpenModal, onCloseM
           <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
             <thead className="bg-slate-50">
               <tr>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600">Name</th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600">Phone</th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600">Status</th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600">Owner</th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600">Visit Date</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600">Name</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600">Phone</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600">Status</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600">Owner</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600">Visit Date</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
               {leads.length ? (
                 leads.map((lead) => (
-                  <tr key={lead._id} className="transition hover:bg-blue-50/50">
-                    <td className="px-4 py-3 align-middle">
+                  <tr key={lead._id} className="transition-colors hover:bg-blue-50/60">
+                    <td className="px-5 py-4 align-middle">
                       <div>
-                        <div className="font-semibold text-slate-950">{lead.name}</div>
+                        <div className="text-base font-bold text-slate-950">{lead.name}</div>
                         <div className="text-xs text-slate-500">ID: {lead._id.slice(-6)}</div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 align-middle text-slate-600">{lead.phone}</td>
-                    <td className="px-4 py-3 align-middle">
-                      <div className="flex items-center gap-2">
+                    <td className="px-5 py-4 align-middle text-xs font-medium text-slate-500">{lead.phone}</td>
+                    <td className="px-5 py-4 align-middle">
+                      <div className="flex flex-wrap items-center gap-2">
                         <select
                           value={lead.status}
                           onChange={(e) => onUpdateStatus(lead._id, e.target.value)}
-                          className="rounded-[10px] border border-slate-300 bg-slate-50 px-2.5 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                          className="min-w-[150px] rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         >
                           {statuses.map((status) => (
                             <option key={status} value={status}>
@@ -62,16 +62,16 @@ export default function Leads({ leads, loading, modalOpen, onOpenModal, onCloseM
                             </option>
                           ))}
                         </select>
-                        <span className={`inline-flex w-fit rounded-full border px-2 py-1 text-xs font-semibold ${statusLabelStyles[lead.status]}`}>
+                        <span className={`inline-flex w-fit rounded-full border px-2.5 py-1 text-xs font-semibold ${statusLabelStyles[lead.status]}`}>
                           {lead.status}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 align-middle">
+                    <td className="px-5 py-4 align-middle">
                       <select
                         value={lead.assignedTo || "Unassigned"}
                         onChange={(e) => onUpdateAssignedTo(lead._id, e.target.value)}
-                        className="rounded-[10px] border border-slate-300 bg-slate-50 px-2.5 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="min-w-[130px] rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                       >
                         {ASSIGNEES.map((assignee) => (
                           <option key={assignee} value={assignee}>
@@ -80,14 +80,14 @@ export default function Leads({ leads, loading, modalOpen, onOpenModal, onCloseM
                         ))}
                       </select>
                     </td>
-                    <td className="px-4 py-3 align-middle">
+                    <td className="px-5 py-4 align-middle">
                       {lead.status === "Visit Scheduled" || pendingVisitLeadId === lead._id ? (
                         <div className="flex flex-col gap-2">
                           <input
                             type="date"
-                            value={lead.visitDate ? new Date(lead.visitDate).toISOString().split("T")[0] : ""}
+                            value={formatDateInput(lead.visitDate)}
                             onChange={(e) => onUpdateVisitDate(lead._id, e.target.value)}
-                            className="rounded-[10px] border border-slate-300 bg-slate-50 px-2.5 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            className="min-w-[150px] rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                           />
                           {lead.visitDate && <span className="text-xs font-semibold text-purple-700">{formatDate(lead.visitDate)}</span>}
                         </div>

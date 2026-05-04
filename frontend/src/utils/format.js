@@ -3,9 +3,16 @@ export const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-GB", {
     day: "numeric",
-    month: "short",
+    month: "long",
     year: "numeric",
   });
+};
+
+export const formatDateInput = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().split("T")[0];
 };
 
 export const statusLabelStyles = {
